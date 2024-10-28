@@ -22,7 +22,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Route de connexion
 app.post('/login', (req, res) => {
 	const { username, password } = req.body;
-
 	const user = dataLogin.find(
 		(u) => u.username === username && u.password === password
 	);
@@ -31,10 +30,8 @@ app.post('/login', (req, res) => {
 			.status(400)
 			.json({ message: "Nom d'utilisateur ou mot de passe incorrect" });
 	}
-
 	// Créer un token JWT
 	const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
-
 	res.json({ token });
 });
 
