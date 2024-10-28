@@ -1,46 +1,35 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-const dataLogin = require('./utils/dataLogin');
 const authenticateJWT = require('./middleware/authenticate');
-dotenv.config();
+const mongoose = require('mongoose');
+const userRoutes = require('./router/user.routes');
+const loginRoutes = require('./router/user.login');
 const app = express();
+dotenv.config();
 
-// Middleware
 app.use(
 	cors({
 		origin: 'http://localhost:5173',
 	})
 );
 app.use(bodyParser.json());
+app.use('/user', userRoutes);
+app.use('/login', loginRoutes);
 
-// Clé secrète pour signer le JWT
-const JWT_SECRET = process.env.JWT_SECRET;
-
-// Route de connexion
-app.post('/login', (req, res) => {
-	const { username, password } = req.body;
-	const user = dataLogin.find(
-		(u) => u.username === username && u.password === password
-	);
-	if (!user) {
-		return res
-			.status(400)
-			.json({ message: "Nom d'utilisateur ou mot de passe incorrect" });
-	}
-	// Créer un token JWT
-	const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
-	res.json({ token });
-});
+app.use(express.json());
 
 app.get('/protected', authenticateJWT, (req, res) => {
-	// const token=req.headers['authorization'].split(' ')[1];
 	console.log(req.user);
 });
 
-// Lancer le serveur
-app.listen(3000, () => {
-	console.log('Serveur lancé sur le port 3000');
-});
+mongoose
+	.connect('mongodb://127.0.0.1:27017/portfolio')
+	.then(() => {
+		console.log('Connexion à MongoDB réussie');
+		app.listen(3000, () => {
+			console.log('Serveur lancé sur le port 3000');
+		});
+	})
+	.catch((error) => console.error('Erreur de connexion à MongoDB:', error));
