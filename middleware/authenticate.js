@@ -1,7 +1,7 @@
 // authenticate.js
 const jwt = require('jsonwebtoken');
 const dataLogin = require('../utils/dataLogin');
-
+const User = require('../models/User');
 
 // Middleware d'authentification JWT
 const authenticateJWT = (req, res, next) => {
@@ -16,7 +16,7 @@ const authenticateJWT = (req, res, next) => {
     jwt.verify(token, JWT_SECRET, (err, decrypted) => {
         if (!err) {
             const idUser = decrypted.id;
-            const user = dataLogin.find(u => u.id === idUser);
+            const user = User.findById(idUser);
             
             if (user) {
                 req.user = user;
